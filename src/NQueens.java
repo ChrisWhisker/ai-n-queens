@@ -89,7 +89,55 @@ public class NQueens {
 
 	// Backtracking with Maintaining Arc Consistency (MAC)
 	private static void solveNQueensMAC(int row) {
-		// *** Implement backtracking with Maintaining Arc Consistency (MAC) here ***
+		// Base case: If all queens are placed successfully, add the solution to the
+		// list
+		if (row == n) {
+			solutions.add(Arrays.copyOf(queens, n));
+			solutionCount++;
+			return;
+		}
+
+		// Recursive case: Try placing a queen in each column of the current row
+		for (int col = 0; col < n; col++) {
+			queens[row] = col; // Place the queen
+
+			// Apply MAC (Maintaining Arc Consistency)
+			boolean consistent = applyMAC(row);
+			if (consistent) {
+				solveNQueensMAC(row + 1); // Move to the next row
+			}
+
+			queens[row] = 0; // Backtrack (remove the queen)
+			backtrackCount++;
+
+			if (solutionCount >= maxSolutions) {
+				return; // Stop the search if the maximum number of solutions is reached
+			}
+		}
+	}
+
+	// Apply MAC (Maintaining Arc Consistency) after placing a queen in the current
+	// row
+	private static boolean applyMAC(int row) {
+		for (int i = 0; i < row; i++) {
+			if (!revise(row, i)) {
+				return false; // Inconsistent assignment, backtrack
+			}
+		}
+		return true; // Assignment consistent so far
+	}
+
+	// Revise the domain of the variable at row 'row' with respect to the constraint
+	// imposed by the variable at row 'i'
+	private static boolean revise(int row, int i) {
+		int col1 = queens[row];
+		int col2 = queens[i];
+
+		// Check if the two queens attack each other diagonally
+		if (Math.abs(col1 - col2) == Math.abs(row - i)) {
+			return false; // Inconsistent, remove col1 from the domain of row
+		}
+		return true; // Consistent
 	}
 
 	// Check if placing a queen at (row, col) is safe using Forward Checking
