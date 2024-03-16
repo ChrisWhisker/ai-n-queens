@@ -12,52 +12,52 @@ public class NQueens {
 	private static int maxSolutions;
 
 	public static void main(String[] args) {
-		Scanner scanner = new Scanner(System.in);
-		// Prompt the user to enter the size of the chess board
-		System.out.print("Enter the size of the chessboard (N): ");
-		n = scanner.nextInt();
-		scanner.nextLine(); // Consume newline
-		maxSolutions = n * 2;
+		try (Scanner scanner = new Scanner(System.in)) {
+			// Prompt the user to enter the size of the chess board
+			System.out.print("Enter the size of the chessboard (N): ");
+			n = scanner.nextInt();
+			scanner.nextLine(); // Consume newline
+			maxSolutions = n * 2;
 
-		// Prompt the user to choose the solving algorithm
-		System.out.print("Choose the solving algorithm (1: Forward Checking, 2: Maintaining Arc Consistency): ");
-		int choice = scanner.nextInt();
-		scanner.close();
+			// Prompt the user to choose the solving algorithm
+			System.out.print("Choose the solving algorithm (1: Forward Checking, 2: Maintaining Arc Consistency): ");
+			int choice = scanner.nextInt();
 
-		queens = new int[n]; // Initialize the array to store queen positions
-		solutions = new ArrayList<>(); // Initialize the list to store solutions
-		String algorithm;
-		long startTime = System.currentTimeMillis();
+			queens = new int[n]; // Initialize the array to store queen positions
+			solutions = new ArrayList<>(); // Initialize the list to store solutions
+			String algorithm;
+			long startTime = System.currentTimeMillis();
 
-		// Choose the solving algorithm based on user input
-		if (choice == 1) {
-			algorithm = "FORWARD CHECKING";
-			solveNQueensForwardChecking(0); // Use Backtracking with Forward Checking
-		} else if (choice == 2) {
-			algorithm = "MAC";
-			solveNQueensMAC(0); // Use Backtracking with Maintaining Arc Consistency (MAC)
-		} else {
-			System.out.println("Invalid choice. Please select 1 or 2.");
-			return;
-		}
-
-		long endTime = System.currentTimeMillis();
-
-		// Print all solutions and statistics
-		if (solutions.isEmpty()) {
-			System.out.println("No solutions found.");
-		} else {
-			System.out.println(algorithm);
-			System.out.print("Solutions : " + solutionCount);
-			if (solutionCount == maxSolutions) {
-				// No more solutions are required to be found according to project description
-				System.out.print(" (max required for n of " + n + ")");
+			// Choose the solving algorithm based on user input
+			if (choice == 1) {
+				algorithm = "FORWARD CHECKING";
+				solveNQueensForwardChecking(0); // Use Backtracking with Forward Checking
+			} else if (choice == 2) {
+				algorithm = "MAC";
+				solveNQueensMAC(0); // Use Backtracking with Maintaining Arc Consistency (MAC)
+			} else {
+				System.out.println("Invalid choice. Please select 1 or 2.");
+				return;
 			}
-			System.out.println("\nTime taken : " + (endTime - startTime) + " milliseconds");
-			System.out.println("Backtracks : " + backtrackCount + "\n");
-			for (int i = 0; i < solutions.size(); i++) {
-				System.out.println("#" + (i + 1));
-				printSolution(solutions.get(i)); // Print each solution
+
+			long endTime = System.currentTimeMillis();
+
+			// Print all solutions and statistics
+			if (solutions.isEmpty()) {
+				System.out.println("No solutions found.");
+			} else {
+				System.out.println(algorithm);
+				System.out.print("Solutions : " + solutionCount);
+				if (solutionCount == maxSolutions) {
+					// No more solutions are required to be found according to project description
+					System.out.print(" (max required for n of " + n + ")");
+				}
+				System.out.println("\nTime taken : " + (endTime - startTime) + " milliseconds");
+				System.out.println("Backtracks : " + backtrackCount + "\n");
+				for (int i = 0; i < solutions.size(); i++) {
+					System.out.println("#" + (i + 1));
+					printSolution(solutions.get(i)); // Print each solution
+				}
 			}
 		}
 	}
@@ -134,10 +134,7 @@ public class NQueens {
 		int col2 = queens[i];
 
 		// Check if the two queens attack each other diagonally
-		if (Math.abs(col1 - col2) == Math.abs(row - i)) {
-			return false; // Inconsistent, remove col1 from the domain of row
-		}
-		return true; // Consistent
+		return Math.abs(col1 - col2) != Math.abs(row - i); // Consistent if not attacking each other diagonally
 	}
 
 	// Check if placing a queen at (row, col) is safe using Forward Checking
@@ -155,11 +152,7 @@ public class NQueens {
 	private static void printSolution(int[] solution) {
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
-				if (solution[i] == j) {
-					System.out.print("1 "); // Print queen
-				} else {
-					System.out.print("0 "); // Print empty square
-				}
+				System.out.print(solution[i] == j ? "1 " : "0 "); // Print queen or empty square
 			}
 			System.out.println();
 		}
