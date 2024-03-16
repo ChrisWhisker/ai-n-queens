@@ -4,31 +4,30 @@ import java.util.List;
 import java.util.Scanner;
 
 public class NQueens {
-	private static int N; // Size of the chess board (N x N)
+	private static int n; // Size of the chess board (n x n)
 	private static int[] queens; // Array to store column positions of queens
 	private static List<int[]> solutions; // List to store all solutions found
 	private static int solutionCount = 0; // Counter for the number of solutions found
 	private static int backtrackCount = 0; // Counter for the total number of backtracks made
 	private static int maxSolutions;
-	private static String algorithm;
 
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
 		// Prompt the user to enter the size of the chess board
 		System.out.print("Enter the size of the chessboard (N): ");
-		N = scanner.nextInt();
+		n = scanner.nextInt();
 		scanner.nextLine(); // Consume newline
-		maxSolutions = N * 2;
+		maxSolutions = n * 2;
 
 		// Prompt the user to choose the solving algorithm
 		System.out.print("Choose the solving algorithm (1: Forward Checking, 2: Maintaining Arc Consistency): ");
 		int choice = scanner.nextInt();
 		scanner.close();
 
-		long startTime = System.currentTimeMillis();
-
-		queens = new int[N]; // Initialize the array to store queen positions
+		queens = new int[n]; // Initialize the array to store queen positions
 		solutions = new ArrayList<>(); // Initialize the list to store solutions
+		String algorithm;
+		long startTime = System.currentTimeMillis();
 
 		// Choose the solving algorithm based on user input
 		if (choice == 1) {
@@ -49,8 +48,12 @@ public class NQueens {
 			System.out.println("No solutions found.");
 		} else {
 			System.out.println(algorithm);
-			System.out.println("Solutions : " + solutionCount);
-			System.out.println("Time taken : " + (endTime - startTime) + " milliseconds");
+			System.out.print("Solutions : " + solutionCount);
+			if (solutionCount == maxSolutions) {
+				// No more solutions are required to be found according to project description
+				System.out.print(" (max required for n of " + n + ")");
+			}
+			System.out.println("\nTime taken : " + (endTime - startTime) + " milliseconds");
 			System.out.println("Backtracks : " + backtrackCount + "\n");
 			for (int i = 0; i < solutions.size(); i++) {
 				System.out.println("#" + (i + 1));
@@ -63,14 +66,14 @@ public class NQueens {
 	private static void solveNQueensForwardChecking(int row) {
 		// Base case: If all queens are placed successfully, add the solution to the
 		// list
-		if (row == N) {
-			solutions.add(Arrays.copyOf(queens, N));
+		if (row == n) {
+			solutions.add(Arrays.copyOf(queens, n));
 			solutionCount++;
 			return;
 		}
 
 		// Recursive case: Try placing a queen in each column of the current row
-		for (int col = 0; col < N; col++) {
+		for (int col = 0; col < n; col++) {
 			if (isSafe(row, col)) {
 				queens[row] = col; // Place the queen
 				solveNQueensForwardChecking(row + 1); // Move to the next row
@@ -100,10 +103,10 @@ public class NQueens {
 		return true;
 	}
 
-	// Print the chessboard with queens placed according to the solution
+	// Print the chess board with queens placed according to the solution
 	private static void printSolution(int[] solution) {
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < N; j++) {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
 				if (solution[i] == j) {
 					System.out.print("1 "); // Print queen
 				} else {
