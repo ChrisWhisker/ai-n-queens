@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +12,7 @@ public class NQueens {
 	private static int solutionCount = 0; // Counter for the number of solutions found
 	private static int backtrackCount = 0; // Counter for the total number of backtracks made
 	private static int maxSolutions;
+	private static String fileContent = "";
 
 	public static void main(String[] args) {
 		try (Scanner scanner = new Scanner(System.in)) {
@@ -43,22 +46,21 @@ public class NQueens {
 			long endTime = System.currentTimeMillis();
 
 			// Print all solutions and statistics
-			if (solutions.isEmpty()) {
-				System.out.println("No solutions found.");
-			} else {
-				System.out.println(algorithm);
-				System.out.print("Solutions : " + solutionCount);
-				if (solutionCount == maxSolutions) {
-					// No more solutions are required to be found according to project description
-					System.out.print(" (max required for n of " + n + ")");
-				}
-				System.out.println("\nTime taken : " + (endTime - startTime) + " milliseconds");
-				System.out.println("Backtracks : " + backtrackCount + "\n");
-				for (int i = 0; i < solutions.size(); i++) {
-					System.out.println("#" + (i + 1));
-					printSolution(solutions.get(i)); // Print each solution
-				}
+			fileContent += algorithm + "\n";
+			fileContent += "Solutions : " + solutionCount;
+			if (solutionCount == maxSolutions) {
+				// No more solutions are required to be found according to project description
+				fileContent += " (max required for n of " + n + ")";
 			}
+			fileContent += "\nTime taken : " + (endTime - startTime) + " milliseconds\n";
+			fileContent += "Backtracks : " + backtrackCount + "\n\n";
+			for (int i = 0; i < solutions.size(); i++) {
+				fileContent += "#" + (i + 1) + "\n";
+				fileContent += formatSolution(solutions.get(i));
+			}
+
+			writeToFile(algorithm + "_" + n + ".txt", fileContent);
+//			System.out.println(fileContent);
 		}
 	}
 
@@ -157,5 +159,39 @@ public class NQueens {
 			System.out.println();
 		}
 		System.out.println();
+	}
+
+	private static String formatSolution(int[] solution) {
+		String formatted = "";
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				formatted += solution[i] == j ? "1 " : "0 ";
+//				System.out.print(solution[i] == j ? "1 " : "0 "); // Print queen or empty square
+			}
+//			System.out.println();
+			formatted += "\n";
+		}
+//		System.out.println();
+		formatted += "\n";
+		return formatted;
+	}
+
+	private static void writeToFile(String filePath, String content) {
+		try {
+			// Create a FileWriter object
+			FileWriter writer = new FileWriter(filePath);
+
+			// Write the content to the file
+			writer.write(content);
+
+			// Close the FileWriter object
+			writer.close();
+
+			System.out.println("Successfully wrote to the file: " + filePath);
+		} catch (IOException e) {
+			// Print the error message if an exception occurs
+			System.out.println("An error occurred while writing to the file: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 }
