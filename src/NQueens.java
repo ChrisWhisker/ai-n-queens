@@ -60,7 +60,7 @@ public class NQueens {
 			}
 
 			writeToFile(algorithm + "_" + n + ".txt", fileContent);
-//			System.out.println(fileContent);
+			System.out.println(fileContent);
 		}
 	}
 
@@ -165,13 +165,10 @@ public class NQueens {
 		String formatted = "";
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
-				formatted += solution[i] == j ? "1 " : "0 ";
-//				System.out.print(solution[i] == j ? "1 " : "0 "); // Print queen or empty square
+				formatted += solution[i] == j ? "1 " : "0 "; // Add queen or empty square
 			}
-//			System.out.println();
 			formatted += "\n";
 		}
-//		System.out.println();
 		formatted += "\n";
 		return formatted;
 	}
