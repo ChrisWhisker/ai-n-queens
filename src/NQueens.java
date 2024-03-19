@@ -6,13 +6,15 @@ import java.util.List;
 import java.util.Scanner;
 
 public class NQueens {
-	private static int boardSize; // Size of the chess board (n x n)
-	private static int[] queenColumns; // Array to store column positions of queens
-	private static List<int[]> solutionsFound; // List to store all solutions found
-	private static int solutionCount = 0; // Counter for the number of solutions found
-	private static int backtrackCount = 0; // Counter for the total number of backtracks made
-	private static int maxSolutions;
-	private static StringBuilder fileContent = new StringBuilder();
+	static int boardSize; // Size of the chess board (n x n)
+	static int[] queenColumns; // Array to store column positions of queens
+	static List<int[]> solutionsFound; // List to store all solutions found
+	static int solutionCount = 0; // Counter for the number of solutions found
+	static int backtrackCount = 0; // Counter for the total number of backtracks made
+	static int maxSolutions;
+	static StringBuilder fileContent = new StringBuilder();
+	static String algorithm;
+	static long executionTime;
 
 	public static void main(String[] args) {
 		try (Scanner scanner = new Scanner(System.in)) {
@@ -28,7 +30,7 @@ public class NQueens {
 
 			queenColumns = new int[boardSize]; // Initialize the array to store queen positions
 			solutionsFound = new ArrayList<>(); // Initialize the list to store solutions
-			String algorithm;
+
 			long startTime = System.currentTimeMillis();
 
 			// Choose the solving algorithm based on user input
@@ -46,28 +48,15 @@ public class NQueens {
 			}
 
 			long endTime = System.currentTimeMillis();
+			executionTime = endTime - startTime;
 
 			// Print all solutions and statistics
-			fileContent.append(algorithm + "\n");
-			fileContent.append("Solutions : " + solutionCount);
-			if (solutionCount == maxSolutions) {
-				// No more solutions are required to be found according to project description
-				fileContent.append(" (max required for n of " + boardSize + ")");
-			}
-			fileContent.append("\nTime taken : " + (endTime - startTime) + " milliseconds\n");
-			fileContent.append("Backtracks : " + backtrackCount + "\n\n");
-			for (int i = 0; i < solutionsFound.size(); i++) {
-				fileContent.append("#" + (i + 1) + "\n");
-				fileContent.append(formatSolution(solutionsFound.get(i)));
-			}
-
-			writeToFile(algorithm + "_" + boardSize + ".txt", fileContent.toString());
-			System.out.println(fileContent);
+			writeResults();
 		}
 	}
 
 	// Backtracking with Forward Checking
-	private static void solveNQueensForwardChecking(int currentRow, int[] domain) {
+	static void solveNQueensForwardChecking(int currentRow, int[] domain) {
 		// Base case: If all queens are placed successfully, add the solution to the
 		// list
 		if (currentRow == boardSize) {
@@ -111,7 +100,7 @@ public class NQueens {
 	}
 
 	// Prune forward-checking domain based on the queen placed at row and col
-	private static void pruneDomainForwardChecking(int row, int col, int[] domain) {
+	static void pruneDomainForwardChecking(int row, int col, int[] domain) {
 		for (int i = row + 1; i < boardSize; i++) {
 			int distance = i - row;
 			domain[col] = 0; // Vertical attack
@@ -125,7 +114,7 @@ public class NQueens {
 	}
 
 	// Backtracking with Maintaining Arc Consistency (MAC)
-	private static void solveNQueensMAC(int currentRow) {
+	static void solveNQueensMAC(int currentRow) {
 		if (solutionCount >= maxSolutions) {
 			// Stop the search if the maximum number of solutions is reached
 			return;
@@ -156,7 +145,7 @@ public class NQueens {
 
 	// Apply MAC (Maintaining Arc Consistency) after placing a queen in the current
 	// row
-	private static boolean applyMAC(int row) {
+	static boolean applyMAC(int row) {
 		for (int i = 0; i < row; i++) {
 			int queenCol1 = queenColumns[i];
 			int queenCol2 = queenColumns[row];
@@ -171,7 +160,25 @@ public class NQueens {
 		return true;
 	}
 
-	private static String formatSolution(int[] solution) {
+	static void writeResults() {
+		fileContent.append(algorithm + "\n");
+		fileContent.append("Solutions : " + solutionCount);
+		if (solutionCount == maxSolutions) {
+			// No more solutions are required to be found according to project description
+			fileContent.append(" (max required for N of " + boardSize + ")");
+		}
+		fileContent.append("\nTime taken : " + executionTime + " milliseconds\n");
+		fileContent.append("Backtracks : " + backtrackCount + "\n\n");
+		for (int i = 0; i < solutionsFound.size(); i++) {
+			fileContent.append("#" + (i + 1) + "\n");
+			fileContent.append(formatSolution(solutionsFound.get(i)));
+		}
+
+		writeToFile(algorithm + "_" + boardSize + ".txt", fileContent.toString());
+		System.out.println(fileContent);
+	}
+
+	static String formatSolution(int[] solution) {
 		StringBuilder formatted = new StringBuilder();
 		for (int i = 0; i < boardSize; i++) {
 			for (int j = 0; j < boardSize; j++) {
@@ -183,7 +190,7 @@ public class NQueens {
 		return formatted.toString();
 	}
 
-	private static void writeToFile(String filePath, String content) {
+	static void writeToFile(String filePath, String content) {
 		try {
 			// Create a FileWriter object
 			FileWriter writer = new FileWriter(filePath);
