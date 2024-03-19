@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Scanner;
 
 public class NQueens {
-	private static int n; // Size of the chess board (n x n)
-	private static int[] queens; // Array to store column positions of queens
-	private static List<int[]> solutions; // List to store all solutions found
+	private static int boardSize; // Size of the chess board (n x n)
+	private static int[] queenColumns; // Array to store column positions of queens
+	private static List<int[]> solutionsFound; // List to store all solutions found
 	private static int solutionCount = 0; // Counter for the number of solutions found
 	private static int backtrackCount = 0; // Counter for the total number of backtracks made
 	private static int maxSolutions;
@@ -18,16 +18,16 @@ public class NQueens {
 		try (Scanner scanner = new Scanner(System.in)) {
 			// Prompt the user to enter the size of the chess board
 			System.out.print("Enter the size of the chessboard (N): ");
-			n = scanner.nextInt();
+			boardSize = scanner.nextInt();
 			scanner.nextLine(); // Consume newline
-			maxSolutions = n * 2;
+			maxSolutions = boardSize * 2;
 
 			// Prompt the user to choose the solving algorithm
 			System.out.print("Choose the solving algorithm (1: Forward Checking, 2: Maintaining Arc Consistency): ");
 			int choice = scanner.nextInt();
 
-			queens = new int[n]; // Initialize the array to store queen positions
-			solutions = new ArrayList<>(); // Initialize the list to store solutions
+			queenColumns = new int[boardSize]; // Initialize the array to store queen positions
+			solutionsFound = new ArrayList<>(); // Initialize the list to store solutions
 			String algorithm;
 			long startTime = System.currentTimeMillis();
 
@@ -35,7 +35,7 @@ public class NQueens {
 			if (choice == 1) {
 				algorithm = "FORWARD CHECKING";
 				// Use Backtracking with Forward Checking
-				solveNQueensForwardChecking(0, new int[n]);
+				solveNQueensForwardChecking(0, new int[boardSize]);
 			} else if (choice == 2) {
 				algorithm = "MAC";
 				// Call function here to use Backtracking with Maintaining Arc Consistency (MAC)
@@ -52,26 +52,26 @@ public class NQueens {
 			fileContent.append("Solutions : " + solutionCount);
 			if (solutionCount == maxSolutions) {
 				// No more solutions are required to be found according to project description
-				fileContent.append(" (max required for n of " + n + ")");
+				fileContent.append(" (max required for n of " + boardSize + ")");
 			}
 			fileContent.append("\nTime taken : " + (endTime - startTime) + " milliseconds\n");
 			fileContent.append("Backtracks : " + backtrackCount + "\n\n");
-			for (int i = 0; i < solutions.size(); i++) {
+			for (int i = 0; i < solutionsFound.size(); i++) {
 				fileContent.append("#" + (i + 1) + "\n");
-				fileContent.append(formatSolution(solutions.get(i)));
+				fileContent.append(formatSolution(solutionsFound.get(i)));
 			}
 
-			writeToFile(algorithm + "_" + n + ".txt", fileContent.toString());
+			writeToFile(algorithm + "_" + boardSize + ".txt", fileContent.toString());
 			System.out.println(fileContent);
 		}
 	}
 
 	// Backtracking with Forward Checking
-	private static void solveNQueensForwardChecking(int row, int[] domain) {
+	private static void solveNQueensForwardChecking(int currentRow, int[] domain) {
 		// Base case: If all queens are placed successfully, add the solution to the
 		// list
-		if (row == n) {
-			solutions.add(Arrays.copyOf(queens, n));
+		if (currentRow == boardSize) {
+			solutionsFound.add(Arrays.copyOf(queenColumns, boardSize));
 			solutionCount++;
 			return;
 		}
@@ -79,28 +79,28 @@ public class NQueens {
 		Arrays.fill(domain, 1); // Initially, all columns are potential candidates
 
 		// Eliminate potential columns and diagonals based on existing queen placements
-		for (int i = 0; i < row; i++) {
-			int col = queens[i]; // Column of the queen in row i
-			domain[col] = 0; // Eliminate the column from the domain
-			int diff = row - i; // Diagonal distance
-			if (col + diff < n) {
-				domain[col + diff] = 0; // Eliminate diagonal (up-right)
+		for (int i = 0; i < currentRow; i++) {
+			int queenColumn = queenColumns[i]; // Column of the queen in row i
+			domain[queenColumn] = 0; // Eliminate the column from the domain
+			int distance = currentRow - i; // Diagonal distance
+			if (queenColumn + distance < boardSize) {
+				domain[queenColumn + distance] = 0; // Eliminate diagonal (up-right)
 			}
-			if (col - diff >= 0) {
-				domain[col - diff] = 0; // Eliminate diagonal (up-left)
+			if (queenColumn - distance >= 0) {
+				domain[queenColumn - distance] = 0; // Eliminate diagonal (up-left)
 			}
 		}
 
 		// Try placing a queen in each potential column
-		for (int col = 0; col < n; col++) {
-			if (domain[col] == 1) { // Check if column is still in the domain
-				queens[row] = col; // Place the queen
-				// System.out.println("Placed queen at row " + row + ", column " + col);
+		for (int column = 0; column < boardSize; column++) {
+			if (domain[column] == 1) { // Check if column is still in the domain
+				queenColumns[currentRow] = column; // Place the queen
 				int[] newDomain = domain.clone(); // Clone domain for the current recursive call
-				pruneDomainFC(row, col, newDomain); // Prune domain based on the newly placed queen
+				pruneDomainForwardChecking(currentRow, column, newDomain); // Prune domain based on the newly placed
+																			// queen
 
-				solveNQueensForwardChecking(row + 1, newDomain); // Recur for the next row
-				queens[row] = 0; // Backtrack
+				solveNQueensForwardChecking(currentRow + 1, newDomain); // Recur for the next row
+				queenColumns[currentRow] = 0; // Backtrack
 				backtrackCount++;
 
 				if (solutionCount >= maxSolutions) {
@@ -111,51 +111,45 @@ public class NQueens {
 	}
 
 	// Prune forward-checking domain based on the queen placed at row and col
-	private static void pruneDomainFC(int row, int col, int[] domain) {
-		for (int i = row + 1; i < n; i++) {
-			int diff = i - row;
+	private static void pruneDomainForwardChecking(int row, int col, int[] domain) {
+		for (int i = row + 1; i < boardSize; i++) {
+			int distance = i - row;
 			domain[col] = 0; // Vertical attack
-			if (col - diff >= 0) {
-				domain[col - diff] = 0; // Diagonal attack (up-left)
+			if (col - distance >= 0) {
+				domain[col - distance] = 0; // Diagonal attack (up-left)
 			}
-			if (col + diff < n) {
-				domain[col + diff] = 0; // Diagonal attack (up-right)
+			if (col + distance < boardSize) {
+				domain[col + distance] = 0; // Diagonal attack (up-right)
 			}
 		}
 	}
 
 	// Backtracking with Maintaining Arc Consistency (MAC)
-	private static void solveNQueensMAC(int row) {
+	private static void solveNQueensMAC(int currentRow) {
 		if (solutionCount >= maxSolutions) {
-			// System.out.println("Maximum solutions reached. Stopping search.");
 			// Stop the search if the maximum number of solutions is reached
 			return;
 		}
 
 		// Base case: If all queens are placed successfully, add the solution to the
 		// list
-		if (row == n) {
-			solutions.add(Arrays.copyOf(queens, n));
+		if (currentRow == boardSize) {
+			solutionsFound.add(Arrays.copyOf(queenColumns, boardSize));
 			solutionCount++;
-			// System.out.println("Solution found. Incrementing solution count."); //
-			// Solution found
 			return;
 		}
 
 		// Recursive case: Try placing a queen in each column of the current row
-		for (int col = 0; col < n; col++) {
-			queens[row] = col; // Place the queen
-			// System.out.println("Placed queen at row " + row + ", column " + col);
-			// Queen placed at (row, col)
+		for (int column = 0; column < boardSize; column++) {
+			queenColumns[currentRow] = column; // Place the queen
 
 			// Apply MAC (Maintaining Arc Consistency)
-			boolean consistent = applyMAC(row);
+			boolean consistent = applyMAC(currentRow);
 			if (consistent) {
-				solveNQueensMAC(row + 1); // Move to the next row
+				solveNQueensMAC(currentRow + 1); // Move to the next row
 			} else {
-				queens[row] = 0; // Backtrack (remove the queen)
+				queenColumns[currentRow] = 0; // Backtrack (remove the queen)
 				backtrackCount++;
-				// System.out.println("Backtracked to row " + row); // Backtracked
 			}
 		}
 	}
@@ -164,14 +158,13 @@ public class NQueens {
 	// row
 	private static boolean applyMAC(int row) {
 		for (int i = 0; i < row; i++) {
-			int col1 = queens[i];
-			int col2 = queens[row];
-			int rowDiff = row - i;
+			int queenCol1 = queenColumns[i];
+			int queenCol2 = queenColumns[row];
+			int rowDifference = row - i;
 
 			// Check if queens attack each other diagonally or in the same column
-			if (col1 == col2 || col1 + rowDiff == col2 || col1 - rowDiff == col2) {
-				// System.out.println("Queens at row " + i + " and row " + row + " attack each
-				// other.");
+			if (queenCol1 == queenCol2 || queenCol1 + rowDifference == queenCol2
+					|| queenCol1 - rowDifference == queenCol2) {
 				return false;
 			}
 		}
@@ -180,8 +173,8 @@ public class NQueens {
 
 	private static String formatSolution(int[] solution) {
 		StringBuilder formatted = new StringBuilder();
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
+		for (int i = 0; i < boardSize; i++) {
+			for (int j = 0; j < boardSize; j++) {
 				formatted.append(solution[i] == j ? "1 " : "0 "); // Add queen or empty square
 			}
 			formatted.append("\n");
