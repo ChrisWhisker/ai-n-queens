@@ -78,6 +78,7 @@ public class NQueens {
 
 		Arrays.fill(domain, 1); // Initially, all columns are potential candidates
 
+		// Eliminate potential columns and diagonals based on existing queen placements
 		for (int i = 0; i < row; i++) {
 			int col = queens[i]; // Column of the queen in row i
 			domain[col] = 0; // Eliminate the column from the domain
@@ -90,15 +91,15 @@ public class NQueens {
 			}
 		}
 
+		// Try placing a queen in each potential column
 		for (int col = 0; col < n; col++) {
 			if (domain[col] == 1) { // Check if column is still in the domain
 				queens[row] = col; // Place the queen
+				// System.out.println("Placed queen at row " + row + ", column " + col);
 				int[] newDomain = domain.clone(); // Clone domain for the current recursive call
 				pruneDomainFC(row, col, newDomain); // Prune domain based on the newly placed queen
 
-				// System.out.println("placing queen at row " + row + " col " + col);
-
-				solveNQueensForwardChecking(row + 1, newDomain);
+				solveNQueensForwardChecking(row + 1, newDomain); // Recur for the next row
 				queens[row] = 0; // Backtrack
 				backtrackCount++;
 
@@ -144,7 +145,7 @@ public class NQueens {
 		// Recursive case: Try placing a queen in each column of the current row
 		for (int col = 0; col < n; col++) {
 			queens[row] = col; // Place the queen
-			// System.out.println("Placed queen at row " + row + ", column " + col); //
+			// System.out.println("Placed queen at row " + row + ", column " + col);
 			// Queen placed at (row, col)
 
 			// Apply MAC (Maintaining Arc Consistency)
@@ -166,6 +167,8 @@ public class NQueens {
 			int col1 = queens[i];
 			int col2 = queens[row];
 			int rowDiff = row - i;
+
+			// Check if queens attack each other diagonally or in the same column
 			if (col1 == col2 || col1 + rowDiff == col2 || col1 - rowDiff == col2) {
 				// System.out.println("Queens at row " + i + " and row " + row + " attack each
 				// other.");
