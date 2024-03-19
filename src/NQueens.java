@@ -39,6 +39,7 @@ public class NQueens {
 			} else if (choice == 2) {
 				algorithm = "MAC";
 				// Call function here to use Backtracking with Maintaining Arc Consistency (MAC)
+				solveNQueensMAC(0);
 			} else {
 				System.out.println("Invalid choice. Please select 1 or 2.");
 				return;
@@ -102,6 +103,49 @@ public class NQueens {
 				}
 			}
 		}
+	}
+
+	// Backtracking with Maintaining Arc Consistency (MAC)
+	private static void solveNQueensMAC(int row) {
+		if (solutionCount >= maxSolutions) {
+			return; // Stop the search if the maximum number of solutions is reached
+		}
+
+		// Base case: If all queens are placed successfully, add the solution to the
+		// list
+		if (row == n) {
+			solutions.add(Arrays.copyOf(queens, n));
+			solutionCount++;
+			return;
+		}
+
+		// Recursive case: Try placing a queen in each column of the current row
+		for (int col = 0; col < n; col++) {
+			queens[row] = col; // Place the queen
+
+			// Apply MAC (Maintaining Arc Consistency)
+			boolean consistent = applyMAC(row);
+			if (consistent) {
+				solveNQueensMAC(row + 1); // Move to the next row
+			} else {
+				queens[row] = 0; // Backtrack (remove the queen)
+				backtrackCount++;
+			}
+		}
+	}
+
+	// Apply MAC (Maintaining Arc Consistency) after placing a queen in the current
+	// row
+	private static boolean applyMAC(int row) {
+		for (int i = 0; i < row; i++) {
+			int col1 = queens[i];
+			int col2 = queens[row];
+			int rowDiff = row - i;
+			if (col1 == col2 || col1 + rowDiff == col2 || col1 - rowDiff == col2) {
+				return false; // Queens attack each other
+			}
+		}
+		return true;
 	}
 
 	@SuppressWarnings("unused")
