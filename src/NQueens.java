@@ -13,46 +13,64 @@ public class NQueens {
 	static int backtrackCount = 0; // Counter for the total number of backtracks made
 	static int maxSolutions;
 	static StringBuilder fileContent = new StringBuilder();
-	static String algorithm;
+	static String algorithm; // Algorithm used for solving
 	static long executionTime;
 
 	public static void main(String[] args) {
-		try (Scanner scanner = new Scanner(System.in)) {
+		int choice = 0;
+
+		if (args.length == 0) {
+			Scanner scanner = new Scanner(System.in);
 			// Prompt the user to enter the size of the chess board
 			System.out.print("Enter the size of the chessboard (N): ");
 			boardSize = scanner.nextInt();
 			scanner.nextLine(); // Consume newline
-			maxSolutions = boardSize * 2;
 
 			// Prompt the user to choose the solving algorithm
 			System.out.print("Choose the solving algorithm (1: Forward Checking, 2: Maintaining Arc Consistency): ");
-			int choice = scanner.nextInt();
-
-			queenColumns = new int[boardSize]; // Initialize the array to store queen positions
-			solutionsFound = new ArrayList<>(); // Initialize the list to store solutions
-
-			long startTime = System.currentTimeMillis();
-
-			// Choose the solving algorithm based on user input
-			if (choice == 1) {
-				algorithm = "FORWARD CHECKING";
-				// Use Backtracking with Forward Checking
-				solveNQueensForwardChecking(0, new int[boardSize]);
-			} else if (choice == 2) {
-				algorithm = "MAC";
-				// Call function here to use Backtracking with Maintaining Arc Consistency (MAC)
-				solveNQueensMAC(0);
-			} else {
-				System.out.println("Invalid choice. Please select 1 or 2.");
+			choice = scanner.nextInt();
+			scanner.close();
+		} else if (args.length >= 2) {
+			switch (args[0]) {
+			case "FOR":
+				choice = 1;
+				break;
+			case "MAC":
+				choice = 2;
+				break;
+			default:
+				System.out.print("Invalid choice of algorithm. Must be FOR or MAC.");
 				return;
 			}
-
-			long endTime = System.currentTimeMillis();
-			executionTime = endTime - startTime;
-
-			// Print all solutions and statistics
-			writeResults();
+			boardSize = Integer.valueOf(args[1]);
 		}
+
+		maxSolutions = boardSize * 2;
+
+		queenColumns = new int[boardSize]; // Initialize the array to store queen positions
+		solutionsFound = new ArrayList<>(); // Initialize the list to store solutions
+
+		long startTime = System.currentTimeMillis();
+
+		// Choose the solving algorithm based on user input
+		if (choice == 1) {
+			algorithm = "FORWARD CHECKING";
+			// Use Backtracking with Forward Checking
+			solveNQueensForwardChecking(0, new int[boardSize]);
+		} else if (choice == 2) {
+			algorithm = "MAC";
+			// Call function here to use Backtracking with Maintaining Arc Consistency (MAC)
+			solveNQueensMAC(0);
+		} else {
+			System.out.println("Invalid choice. Please select 1 or 2.");
+			return;
+		}
+
+		long endTime = System.currentTimeMillis();
+		executionTime = endTime - startTime;
+
+		// Write all solutions and statistics to file
+		writeResults();
 	}
 
 	// Backtracking with Forward Checking
@@ -172,7 +190,7 @@ public class NQueens {
 		}
 
 		writeToFile(algorithm + "_" + boardSize + ".txt", fileContent.toString());
-		System.out.println(fileContent);
+//		System.out.println(fileContent);
 	}
 
 	static String formatSolution(int[] solution) {
