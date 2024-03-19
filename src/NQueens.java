@@ -57,8 +57,7 @@ public class NQueens {
 
 	// Backtracking with Forward Checking
 	static void solveNQueensForwardChecking(int currentRow, int[] domain) {
-		// Base case: If all queens are placed successfully, add the solution to the
-		// list
+		// Base case: If all queens are placed successfully, save the solution
 		if (currentRow == boardSize) {
 			solutionsFound.add(Arrays.copyOf(queenColumns, boardSize));
 			solutionCount++;
@@ -120,8 +119,7 @@ public class NQueens {
 			return;
 		}
 
-		// Base case: If all queens are placed successfully, add the solution to the
-		// list
+		// Base case: If all queens are placed successfully, save the solution
 		if (currentRow == boardSize) {
 			solutionsFound.add(Arrays.copyOf(queenColumns, boardSize));
 			solutionCount++;
@@ -143,8 +141,7 @@ public class NQueens {
 		}
 	}
 
-	// Apply MAC (Maintaining Arc Consistency) after placing a queen in the current
-	// row
+	// Apply MAC after placing a queen in the current row
 	static boolean applyMAC(int row) {
 		for (int i = 0; i < row; i++) {
 			int queenCol1 = queenColumns[i];
@@ -182,7 +179,8 @@ public class NQueens {
 		StringBuilder formatted = new StringBuilder();
 		for (int i = 0; i < boardSize; i++) {
 			for (int j = 0; j < boardSize; j++) {
-				formatted.append(solution[i] == j ? "1 " : "0 "); // Add queen or empty square
+				// Add queen or empty square
+				formatted.append(solution[i] == j ? "1 " : "0 ");
 			}
 			formatted.append("\n");
 		}
@@ -192,15 +190,9 @@ public class NQueens {
 
 	static void writeToFile(String filePath, String content) {
 		try {
-			// Create a FileWriter object
 			FileWriter writer = new FileWriter(filePath);
-
-			// Write the content to the file
 			writer.write(content);
-
-			// Close the FileWriter object
 			writer.close();
-
 			System.out.println("Successfully wrote to the file: " + filePath);
 		} catch (IOException e) {
 			// Print the error message if an exception occurs
