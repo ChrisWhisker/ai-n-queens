@@ -94,7 +94,10 @@ public class NQueens {
 			if (domain[col] == 1) { // Check if column is still in the domain
 				queens[row] = col; // Place the queen
 				int[] newDomain = domain.clone(); // Clone domain for the current recursive call
-				pruneDomain(row, col, newDomain); // Prune domain based on the newly placed queen
+				pruneDomainFC(row, col, newDomain); // Prune domain based on the newly placed queen
+
+				// System.out.println("placing queen at row " + row + " col " + col);
+
 				solveNQueensForwardChecking(row + 1, newDomain);
 				queens[row] = 0; // Backtrack
 				backtrackCount++;
@@ -106,8 +109,8 @@ public class NQueens {
 		}
 	}
 
-	// Prune domain based on the queen placed at row and col
-	private static void pruneDomain(int row, int col, int[] domain) {
+	// Prune forward-checking domain based on the queen placed at row and col
+	private static void pruneDomainFC(int row, int col, int[] domain) {
 		for (int i = row + 1; i < n; i++) {
 			int diff = i - row;
 			domain[col] = 0; // Vertical attack
@@ -123,7 +126,9 @@ public class NQueens {
 	// Backtracking with Maintaining Arc Consistency (MAC)
 	private static void solveNQueensMAC(int row) {
 		if (solutionCount >= maxSolutions) {
-			return; // Stop the search if the maximum number of solutions is reached
+			// System.out.println("Maximum solutions reached. Stopping search.");
+			// Stop the search if the maximum number of solutions is reached
+			return;
 		}
 
 		// Base case: If all queens are placed successfully, add the solution to the
@@ -131,12 +136,16 @@ public class NQueens {
 		if (row == n) {
 			solutions.add(Arrays.copyOf(queens, n));
 			solutionCount++;
+			// System.out.println("Solution found. Incrementing solution count."); //
+			// Solution found
 			return;
 		}
 
 		// Recursive case: Try placing a queen in each column of the current row
 		for (int col = 0; col < n; col++) {
 			queens[row] = col; // Place the queen
+			// System.out.println("Placed queen at row " + row + ", column " + col); //
+			// Queen placed at (row, col)
 
 			// Apply MAC (Maintaining Arc Consistency)
 			boolean consistent = applyMAC(row);
@@ -145,6 +154,7 @@ public class NQueens {
 			} else {
 				queens[row] = 0; // Backtrack (remove the queen)
 				backtrackCount++;
+				// System.out.println("Backtracked to row " + row); // Backtracked
 			}
 		}
 	}
@@ -157,7 +167,9 @@ public class NQueens {
 			int col2 = queens[row];
 			int rowDiff = row - i;
 			if (col1 == col2 || col1 + rowDiff == col2 || col1 - rowDiff == col2) {
-				return false; // Queens attack each other
+				// System.out.println("Queens at row " + i + " and row " + row + " attack each
+				// other.");
+				return false;
 			}
 		}
 		return true;
