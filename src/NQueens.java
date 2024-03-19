@@ -12,7 +12,7 @@ public class NQueens {
 	private static int solutionCount = 0; // Counter for the number of solutions found
 	private static int backtrackCount = 0; // Counter for the total number of backtracks made
 	private static int maxSolutions;
-	private static String fileContent = "";
+	private static StringBuilder fileContent = new StringBuilder();
 
 	public static void main(String[] args) {
 		try (Scanner scanner = new Scanner(System.in)) {
@@ -35,7 +35,7 @@ public class NQueens {
 			if (choice == 1) {
 				algorithm = "FORWARD CHECKING";
 				// Use Backtracking with Forward Checking
-				solveNQueensForwardChecking(0);
+				solveNQueensForwardChecking(0, new int[n]);
 			} else if (choice == 2) {
 				algorithm = "MAC";
 				// Call function here to use Backtracking with Maintaining Arc Consistency (MAC)
@@ -48,26 +48,26 @@ public class NQueens {
 			long endTime = System.currentTimeMillis();
 
 			// Print all solutions and statistics
-			fileContent += algorithm + "\n";
-			fileContent += "Solutions : " + solutionCount;
+			fileContent.append(algorithm + "\n");
+			fileContent.append("Solutions : " + solutionCount);
 			if (solutionCount == maxSolutions) {
 				// No more solutions are required to be found according to project description
-				fileContent += " (max required for n of " + n + ")";
+				fileContent.append(" (max required for n of " + n + ")");
 			}
-			fileContent += "\nTime taken : " + (endTime - startTime) + " milliseconds\n";
-			fileContent += "Backtracks : " + backtrackCount + "\n\n";
+			fileContent.append("\nTime taken : " + (endTime - startTime) + " milliseconds\n");
+			fileContent.append("Backtracks : " + backtrackCount + "\n\n");
 			for (int i = 0; i < solutions.size(); i++) {
-				fileContent += "#" + (i + 1) + "\n";
-				fileContent += formatSolution(solutions.get(i));
+				fileContent.append("#" + (i + 1) + "\n");
+				fileContent.append(formatSolution(solutions.get(i)));
 			}
 
-			writeToFile(algorithm + "_" + n + ".txt", fileContent);
+			writeToFile(algorithm + "_" + n + ".txt", fileContent.toString());
 			System.out.println(fileContent);
 		}
 	}
 
 	// Backtracking with Forward Checking
-	private static void solveNQueensForwardChecking(int row) {
+	private static void solveNQueensForwardChecking(int row, int[] domain) {
 		// Base case: If all queens are placed successfully, add the solution to the
 		// list
 		if (row == n) {
@@ -76,7 +76,6 @@ public class NQueens {
 			return;
 		}
 
-		int[] domain = new int[n]; // Domain for the current row
 		Arrays.fill(domain, 1); // Initially, all columns are potential candidates
 
 		for (int i = 0; i < row; i++) {
@@ -94,13 +93,29 @@ public class NQueens {
 		for (int col = 0; col < n; col++) {
 			if (domain[col] == 1) { // Check if column is still in the domain
 				queens[row] = col; // Place the queen
-				solveNQueensForwardChecking(row + 1);
+				int[] newDomain = domain.clone(); // Clone domain for the current recursive call
+				pruneDomain(row, col, newDomain); // Prune domain based on the newly placed queen
+				solveNQueensForwardChecking(row + 1, newDomain);
 				queens[row] = 0; // Backtrack
 				backtrackCount++;
 
 				if (solutionCount >= maxSolutions) {
 					return;
 				}
+			}
+		}
+	}
+
+	// Prune domain based on the queen placed at row and col
+	private static void pruneDomain(int row, int col, int[] domain) {
+		for (int i = row + 1; i < n; i++) {
+			int diff = i - row;
+			domain[col] = 0; // Vertical attack
+			if (col - diff >= 0) {
+				domain[col - diff] = 0; // Diagonal attack (up-left)
+			}
+			if (col + diff < n) {
+				domain[col + diff] = 0; // Diagonal attack (up-right)
 			}
 		}
 	}
@@ -148,29 +163,16 @@ public class NQueens {
 		return true;
 	}
 
-	@SuppressWarnings("unused")
-	@Deprecated
-	// Print the chess board with queens placed according to the solution
-	private static void printSolution(int[] solution) {
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				System.out.print(solution[i] == j ? "1 " : "0 "); // Print queen or empty square
-			}
-			System.out.println();
-		}
-		System.out.println();
-	}
-
 	private static String formatSolution(int[] solution) {
-		String formatted = "";
+		StringBuilder formatted = new StringBuilder();
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
-				formatted += solution[i] == j ? "1 " : "0 "; // Add queen or empty square
+				formatted.append(solution[i] == j ? "1 " : "0 "); // Add queen or empty square
 			}
-			formatted += "\n";
+			formatted.append("\n");
 		}
-		formatted += "\n";
-		return formatted;
+		formatted.append("\n");
+		return formatted.toString();
 	}
 
 	private static void writeToFile(String filePath, String content) {
