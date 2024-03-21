@@ -7,26 +7,23 @@ import java.util.Scanner;
 
 public class NQueens {
 	static int boardSize; // Size of the chess board (n x n)
-	static int[] queenColumns; // Array to store column positions of queens
-	static List<int[]> solutionsFound; // List to store all solutions found
-	static int solutionCount = 0; // Counter for the number of solutions found
-	static int backtrackCount = 0; // Counter for the total number of backtracks made
-	static int maxSolutions;
-	static StringBuilder fileContent = new StringBuilder();
+	static int[] queenColumns; // Column positions of queens
+	static List<int[]> solutionsFound; // All solutions found
+	static int backtrackCount = 0; // Total number of backtracks made
+	static int maxSolutions; // Max solutions required for this board size (equals size * 2)
+	static StringBuilder fileContent = new StringBuilder(); // Contents of file to write to
 	static String algorithm; // Algorithm used for solving
-	static long executionTime;
+	static long executionTime; // Time from start to end of solving
 
 	public static void main(String[] args) {
 		int choice = 0;
 
-		if (args.length == 0) {
+		if (args.length == 0) { // For testing
 			Scanner scanner = new Scanner(System.in);
-			// Prompt the user to enter the size of the chess board
 			System.out.print("Enter the size of the chessboard (N): ");
 			boardSize = scanner.nextInt();
-			scanner.nextLine(); // Consume newline
+			scanner.nextLine();
 
-			// Prompt the user to choose the solving algorithm
 			System.out.print("Choose the solving algorithm (1: Forward Checking, 2: Maintaining Arc Consistency): ");
 			choice = scanner.nextInt();
 			scanner.close();
@@ -47,30 +44,35 @@ public class NQueens {
 
 		maxSolutions = boardSize * 2;
 
-		queenColumns = new int[boardSize]; // Initialize the array to store queen positions
-		solutionsFound = new ArrayList<>(); // Initialize the list to store solutions
+		// Initialize arrays
+		queenColumns = new int[boardSize];
+		solutionsFound = new ArrayList<>();
 
 		long startTime = System.currentTimeMillis();
 
 		// Choose the solving algorithm based on user input
 		if (choice == 1) {
 			algorithm = "FORWARD CHECKING";
-			// Use Backtracking with Forward Checking
+			// Use Forward Checking
 			solveNQueensForwardChecking(0, new int[boardSize]);
 		} else if (choice == 2) {
 			algorithm = "MAC";
-			// Call function here to use Backtracking with Maintaining Arc Consistency (MAC)
+			// Use Maintaining Arc Consistency (MAC)
 			solveNQueensMAC(0);
 		} else {
-			System.out.println("Invalid choice. Please select 1 or 2.");
+			System.out.println("Invalid algorithm choice.");
 			return;
 		}
 
 		long endTime = System.currentTimeMillis();
 		executionTime = endTime - startTime;
 
-		// Write all solutions and statistics to file
-		writeResults();
+		// Write stats and solutions to file
+		if (args.length > 2) {
+			writeResults(args[2]);
+		} else {
+			writeResults(algorithm + "_" + boardSize + ".txt");
+		}
 	}
 
 	// Backtracking with Forward Checking
@@ -78,61 +80,60 @@ public class NQueens {
 		// Base case: If all queens are placed successfully, save the solution
 		if (currentRow == boardSize) {
 			solutionsFound.add(Arrays.copyOf(queenColumns, boardSize));
-			solutionCount++;
 			return;
 		}
 
-		Arrays.fill(domain, 1); // Initially, all columns are potential candidates
+		Arrays.fill(domain, 1); // Initially, all columns are in the domain
 
-		// Eliminate potential columns and diagonals based on existing queen placements
+		// Remove columns and diagonals from domain based on existing queen placements
 		for (int i = 0; i < currentRow; i++) {
 			int queenColumn = queenColumns[i]; // Column of the queen in row i
-			domain[queenColumn] = 0; // Eliminate the column from the domain
+			domain[queenColumn] = 0; // Remove the column from the domain
 			int distance = currentRow - i; // Diagonal distance
 			if (queenColumn + distance < boardSize) {
-				domain[queenColumn + distance] = 0; // Eliminate diagonal (up-right)
+				domain[queenColumn + distance] = 0; // Remove [/] diagonal
 			}
 			if (queenColumn - distance >= 0) {
-				domain[queenColumn - distance] = 0; // Eliminate diagonal (up-left)
+				domain[queenColumn - distance] = 0; // Remove [\] diagonal
 			}
 		}
 
 		// Try placing a queen in each potential column
 		for (int column = 0; column < boardSize; column++) {
-			if (domain[column] == 1) { // Check if column is still in the domain
+			if (domain[column] == 1) { // Check if column is in the domain
 				queenColumns[currentRow] = column; // Place the queen
 				int[] newDomain = domain.clone(); // Clone domain for the current recursive call
-				pruneDomainForwardChecking(currentRow, column, newDomain); // Prune domain based on the newly placed
-																			// queen
+				// Prune domain based on the newly placed queen
+				pruneDomainForwardChecking(currentRow, column, newDomain); 
 
 				solveNQueensForwardChecking(currentRow + 1, newDomain); // Recur for the next row
 				queenColumns[currentRow] = 0; // Backtrack
 				backtrackCount++;
 
-				if (solutionCount >= maxSolutions) {
+				if (solutionsFound.size() >= maxSolutions) {
 					return;
 				}
 			}
 		}
 	}
 
-	// Prune forward-checking domain based on the queen placed at row and col
+	// Prune forward-checking domain based on the queen placed at row, col
 	static void pruneDomainForwardChecking(int row, int col, int[] domain) {
 		for (int i = row + 1; i < boardSize; i++) {
 			int distance = i - row;
-			domain[col] = 0; // Vertical attack
+			domain[col] = 0; // Remove the column from the domain
 			if (col - distance >= 0) {
-				domain[col - distance] = 0; // Diagonal attack (up-left)
+				domain[col - distance] = 0; // Remove [\] diagonal
 			}
 			if (col + distance < boardSize) {
-				domain[col + distance] = 0; // Diagonal attack (up-right)
+				domain[col + distance] = 0; // Remove [\] diagonal
 			}
 		}
 	}
 
 	// Backtracking with Maintaining Arc Consistency (MAC)
 	static void solveNQueensMAC(int currentRow) {
-		if (solutionCount >= maxSolutions) {
+		if (solutionsFound.size() >= maxSolutions) {
 			// Stop the search if the maximum number of solutions is reached
 			return;
 		}
@@ -140,7 +141,6 @@ public class NQueens {
 		// Base case: If all queens are placed successfully, save the solution
 		if (currentRow == boardSize) {
 			solutionsFound.add(Arrays.copyOf(queenColumns, boardSize));
-			solutionCount++;
 			return;
 		}
 
@@ -175,10 +175,11 @@ public class NQueens {
 		return true;
 	}
 
-	static void writeResults() {
+	// Write the stats and solutions to a file at fileName
+	static void writeResults(String fileName) {
 		fileContent.append(algorithm + "\n");
-		fileContent.append("Solutions : " + solutionCount);
-		if (solutionCount == maxSolutions) {
+		fileContent.append("Solutions : " + solutionsFound.size());
+		if (solutionsFound.size() == maxSolutions) {
 			// No more solutions are required to be found according to project description
 			fileContent.append(" (max required for N of " + boardSize + ")");
 		}
@@ -189,15 +190,16 @@ public class NQueens {
 			fileContent.append(formatSolution(solutionsFound.get(i)));
 		}
 
-		writeToFile(algorithm + "_" + boardSize + ".txt", fileContent.toString());
+		writeToFile(fileName, fileContent.toString());
 //		System.out.println(fileContent);
 	}
 
+	// Get the string grid with 0s and 1s representing this solution
 	static String formatSolution(int[] solution) {
 		StringBuilder formatted = new StringBuilder();
 		for (int i = 0; i < boardSize; i++) {
 			for (int j = 0; j < boardSize; j++) {
-				// Add queen or empty square
+				// Add queen or empty cell
 				formatted.append(solution[i] == j ? "1 " : "0 ");
 			}
 			formatted.append("\n");
@@ -206,6 +208,7 @@ public class NQueens {
 		return formatted.toString();
 	}
 
+	// File writing functionality abstracted away here
 	static void writeToFile(String filePath, String content) {
 		try {
 			FileWriter writer = new FileWriter(filePath);
