@@ -9,8 +9,8 @@ public class NQueens {
 	static int boardSize; // Size of the chess board (n x n)
 	static int[] queenColumns; // Column positions of queens
 	static List<int[]> solutionsFound; // All solutions found
-	static int backtrackCount = 0; // Total number of backtracks made
 	static int maxSolutions; // Max solutions required for this board size (equals size * 2)
+	static int backtrackCount = 0; // Total number of backtracks made
 	static StringBuilder fileContent = new StringBuilder(); // Contents of file to write to
 	static String algorithm; // Algorithm used for solving
 	static long executionTime; // Time from start to end of solving
@@ -104,7 +104,7 @@ public class NQueens {
 				queenColumns[currentRow] = column; // Place the queen
 				int[] newDomain = domain.clone(); // Clone domain for the current recursive call
 				// Prune domain based on the newly placed queen
-				pruneDomainForwardChecking(currentRow, column, newDomain); 
+				pruneDomainForwardChecking(currentRow, column, newDomain);
 
 				solveNQueensForwardChecking(currentRow + 1, newDomain); // Recur for the next row
 				queenColumns[currentRow] = 0; // Backtrack
